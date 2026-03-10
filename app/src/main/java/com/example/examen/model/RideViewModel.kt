@@ -16,12 +16,11 @@ import kotlin.collections.emptyList
 class RideViewModel : ViewModel() {
 
     private val auth = FirebaseAuth.getInstance()
-    private val db = FirebaseFirestore.getInstance()
 
-    var rideHistory by mutableStateOf<List<Ride>>(emptyList())
+    var rideHistory: List<Ride> by mutableStateOf(emptyList())
         private set
 
-    fun loadMyRides() {
+    fun loadRideHistory() {
         val user = auth.currentUser ?: return
 
         viewModelScope.launch {
@@ -31,13 +30,13 @@ class RideViewModel : ViewModel() {
                     .get()
                     .await()
 
-                val rides = snapshot.documents.mapNotNull { doc ->
-                    doc.toObject(Ride::class.java)?.copy(firestoreId = doc.id)
+                rideHistory = snapshot.documents.mapNotNull { doc ->
+                    doc.toObject(Ride::class.java)?.copy(
+                        firestoreId = doc.id
+                    )
+
                 }
-
-                rideHistory = rides
-
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 rideHistory = emptyList()
             }
         }
